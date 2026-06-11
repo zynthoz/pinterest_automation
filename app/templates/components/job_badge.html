@@ -1,13 +1,13 @@
 {% set status = job.status %}
 
 {% if status == 'queued' %}
-<span class="badge badge-queued">⏳ Queued</span>
+<span class="badge badge-queued">Queued</span>
 {% elif status in ('extracting', 'searching', 'downloading', 'generating', 'scheduling', 'publishing') %}
-<span class="badge badge-active"><span class="badge-dot"></span> {{ status | capitalize }}</span>
+<span class="badge badge-active">{{ status | capitalize }}</span>
 {% elif status == 'completed' %}
-<span class="badge badge-completed">✓ Completed</span>
+<span class="badge badge-completed">Completed</span>
 {% elif status == 'failed' %}
-<span class="badge badge-failed">✕ Failed</span>
+<span class="badge badge-failed">Failed</span>
 {% else %}
 <span class="badge badge-draft">{{ status }}</span>
 {% endif %}

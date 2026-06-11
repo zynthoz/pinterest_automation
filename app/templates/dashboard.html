@@ -1,134 +1,217 @@
 {% extends "base.html" %}
 {% set active_page = "dashboard" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Workspace{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Dashboard</h1>
-    <p class="page-subtitle">Paste Amazon affiliate links to create Pinterest pins automatically</p>
+    <h1 class="page-title">Workspace</h1>
+    <p class="page-subtitle">Add Amazon links and manage your active visual automation pipeline</p>
 </div>
 
-<!-- Stats Grid -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-label">Active Jobs</div>
-        <div class="stat-value info" id="stat-active">{{ stats.active_jobs }}</div>
+<!-- Compact Status Tracker Bar -->
+<div class="status-tracker">
+    <div class="status-tracker-item">
+        <span class="status-tracker-label">Active Pipelines</span>
+        <span class="status-tracker-value info" id="stat-active">{{ stats.active_jobs }}</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Completed</div>
-        <div class="stat-value success" id="stat-completed">{{ stats.completed_jobs }}</div>
+    <div class="status-tracker-divider"></div>
+    <div class="status-tracker-item">
+        <span class="status-tracker-label">Completed</span>
+        <span class="status-tracker-value success" id="stat-completed">{{ stats.completed_jobs }}</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Failed</div>
-        <div class="stat-value error" id="stat-failed">{{ stats.failed_jobs }}</div>
+    <div class="status-tracker-divider"></div>
+    <div class="status-tracker-item">
+        <span class="status-tracker-label">Failed</span>
+        <span class="status-tracker-value error" id="stat-failed">{{ stats.failed_jobs }}</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Published Pins</div>
-        <div class="stat-value success" id="stat-published">{{ stats.published_pins }}</div>
+    <div class="status-tracker-divider"></div>
+    <div class="status-tracker-item">
+        <span class="status-tracker-label">Published Pins</span>
+        <span class="status-tracker-value success" id="stat-published">{{ stats.published_pins }}</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Scheduled</div>
-        <div class="stat-value scheduled" id="stat-scheduled">{{ stats.scheduled_pins }}</div>
+    <div class="status-tracker-divider"></div>
+    <div class="status-tracker-item">
+        <span class="status-tracker-label">Scheduled</span>
+        <span class="status-tracker-value scheduled" id="stat-scheduled">{{ stats.scheduled_pins }}</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Total Jobs</div>
-        <div class="stat-value" id="stat-total">{{ stats.total_jobs }}</div>
-    </div>
-</div>
-
-<!-- URL Input Section -->
-<div class="input-section">
-    <div class="input-section-title">
-        🔗 Add Amazon Affiliate Links
-    </div>
-
-    <!-- Single / Bulk tabs -->
-    <div class="input-tabs">
-        <button class="input-tab active" id="tab-single" onclick="switchTab('single')">Single URL</button>
-        <button class="input-tab" id="tab-bulk" onclick="switchTab('bulk')">Bulk Paste</button>
-    </div>
-
-    <!-- Single URL input -->
-    <div id="input-single">
-        <div class="input-row">
-            <input
-                type="url"
-                class="input-field"
-                id="single-url-input"
-                placeholder="https://www.amazon.com/dp/B0XXXXXXXX?tag=yourtag-20"
-                autofocus
-            >
-            <button class="btn btn-primary" id="btn-add-single" onclick="submitSingle()">
-                <span id="btn-add-text">Add & Process</span>
-                <div class="spinner hidden" id="btn-add-spinner"></div>
-            </button>
-        </div>
-    </div>
-
-    <!-- Bulk URL input -->
-    <div id="input-bulk" class="hidden">
-        <textarea
-            class="input-field"
-            id="bulk-url-input"
-            placeholder="Paste one Amazon URL per line...&#10;https://www.amazon.com/dp/B0XXXXXXXX?tag=yourtag-20&#10;https://amzn.to/xxxxx&#10;https://www.amazon.com/dp/B0YYYYYYYY?tag=yourtag-20"
-            rows="5"
-        ></textarea>
-        <div style="display: flex; justify-content: flex-end; margin-top: var(--space-md); gap: var(--space-sm);">
-            <span class="text-muted" style="font-size: 0.78rem; align-self: center;" id="bulk-count">0 URLs detected</span>
-            <button class="btn btn-primary" id="btn-add-bulk" onclick="submitBulk()">
-                <span id="btn-bulk-text">Queue All</span>
-                <div class="spinner hidden" id="btn-bulk-spinner"></div>
-            </button>
-        </div>
+    <div class="status-tracker-divider"></div>
+    <div class="status-tracker-item">
+        <span class="status-tracker-label">Total Jobs</span>
+        <span class="status-tracker-value" id="stat-total">{{ stats.total_jobs }}</span>
     </div>
 </div>
 
-<!-- Jobs List -->
-<div class="jobs-section">
-    <div class="section-header">
-        <h2 class="section-title">Recent Jobs</h2>
-        <button class="btn btn-secondary btn-sm" onclick="refreshJobs()">↻ Refresh</button>
-    </div>
-
-    <div class="jobs-list" id="jobs-list">
-        {% if jobs %}
-            {% for job in jobs %}
-            <div class="job-card" id="job-{{ job.id }}" data-status="{{ job.status }}">
-                {% if job.product_image %}
-                <img class="job-product-img" src="{{ job.product_image }}" alt="Product">
-                {% else %}
-                <div class="job-product-img" style="display:flex;align-items:center;justify-content:center;font-size:1.3rem;">📦</div>
-                {% endif %}
-
-                <div class="job-info">
-                    <div class="job-title">{{ job.product_title or 'Processing...' }}</div>
-                    <div class="job-url truncate">{{ job.affiliate_url }}</div>
-                    {% if job.current_step %}
-                    <div class="job-step">{{ job.current_step }}</div>
-                    {% endif %}
-                    {% if job.error %}
-                    <div class="job-step text-error">{{ job.error[:100] }}</div>
-                    {% endif %}
+<!-- Workspace Grid -->
+<div class="workspace-grid">
+    <!-- Left Column: Ingestion & Control -->
+    <div class="workspace-left">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <svg class="icon icon-accent" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    Amazon Affiliate Links
+                </h2>
+            </div>
+            <div class="panel-body">
+                <!-- Single / Bulk tabs -->
+                <div class="input-tabs">
+                    <button class="input-tab active" id="tab-single" onclick="switchTab('single')">Single Link</button>
+                    <button class="input-tab" id="tab-bulk" onclick="switchTab('bulk')">Bulk Import</button>
                 </div>
 
-                <div class="job-status">
-                    {% include "components/job_badge.html" %}
+                <!-- Single Link input -->
+                <div id="input-single">
+                    <div class="input-group" style="gap: var(--space-md);">
+                        <label class="input-label" for="single-url-input">Amazon Product URL</label>
+                        <input
+                            type="url"
+                            class="input-field"
+                            id="single-url-input"
+                            placeholder="https://www.amazon.com/dp/..."
+                            autofocus
+                        >
+                        <button class="btn btn-primary" id="btn-add-single" onclick="submitSingle()" style="width: 100%;">
+                            <span id="btn-add-text">Add & Process</span>
+                            <div class="spinner hidden" id="btn-add-spinner"></div>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="job-actions">
-                    {% if job.status == 'failed' %}
-                    <button class="btn btn-secondary btn-sm" onclick="retryJob({{ job.id }})">↻ Retry</button>
+                <!-- Bulk Links input -->
+                <div id="input-bulk" class="hidden">
+                    <div class="input-group" style="gap: var(--space-md);">
+                        <label class="input-label" for="bulk-url-input">Bulk Amazon URLs (One per line)</label>
+                        <textarea
+                            class="input-field"
+                            id="bulk-url-input"
+                            placeholder="https://www.amazon.com/dp/...&#10;https://amzn.to/..."
+                            rows="5"
+                        ></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="text-muted" style="font-size: 0.8rem; font-weight: 500;" id="bulk-count">0 URLs detected</span>
+                            <button class="btn btn-primary" id="btn-add-bulk" onclick="submitBulk()">
+                                <span id="btn-bulk-text">Queue All</span>
+                                <div class="spinner hidden" id="btn-bulk-spinner"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Publishing Target
+                </h2>
+            </div>
+            <div class="panel-body" style="padding: var(--space-md) var(--space-lg); display: flex; flex-direction: column; gap: var(--space-sm);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span class="text-secondary" style="font-size: 0.85rem; font-weight: 500;">Connection</span>
+                    {% if pinterest_connected %}
+                    <span class="badge badge-completed">Connected</span>
+                    {% else %}
+                    <span class="badge badge-failed">Disconnected</span>
                     {% endif %}
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">📌</div>
-                <div class="empty-state-text">No jobs yet. Paste an Amazon link above to get started!</div>
+        </div>
+    </div>
+
+    <!-- Right Column: Visual Pipeline Tracker feed -->
+    <div class="workspace-right">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Active Pipelines & Recent Runs
+                </h2>
+                <button class="btn btn-secondary btn-sm" onclick="refreshJobs()">↻ Refresh</button>
             </div>
-        {% endif %}
+            <div class="panel-body" style="padding: var(--space-lg);">
+                <div class="jobs-list" id="jobs-list">
+                    {% if jobs %}
+                        {% for job in jobs %}
+                        <!-- Visual Pipeline Job Card -->
+                        <div class="job-card" id="job-{{ job.id }}" data-status="{{ job.status }}">
+                            <div class="job-card-header">
+                                {% if job.product_image %}
+                                <img class="job-product-img" src="{{ job.product_image }}" alt="Product">
+                                {% else %}
+                                <div class="job-product-img" style="display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:var(--bg-sidebar);">📦</div>
+                                {% endif %}
+
+                                <div class="job-info">
+                                    <div class="job-title" title="{{ job.product_title or 'Processing...' }}">{{ job.product_title or 'Processing...' }}</div>
+                                    <div class="job-meta">
+                                        <div class="job-meta-item">
+                                            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                            <a href="{{ job.affiliate_url }}" target="_blank" class="truncate">{{ job.affiliate_url }}</a>
+                                        </div>
+                                        <div class="job-meta-item">
+                                            <span>#{{ job.id }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="job-status">
+                                    {% include "components/job_badge.html" %}
+                                </div>
+                            </div>
+
+                            <!-- Real-time pipeline visual steps -->
+                            <div class="pipeline">
+                                <div class="pipeline-line">
+                                    <div class="pipeline-line-progress" id="job-progress-line-{{ job.id }}"></div>
+                                </div>
+                                <div class="pipeline-step" id="job-step-scrape-{{ job.id }}">
+                                    <div class="pipeline-dot">1</div>
+                                    <div class="pipeline-label">Scrape TikTok</div>
+                                </div>
+                                <div class="pipeline-step" id="job-step-download-{{ job.id }}">
+                                    <div class="pipeline-dot">2</div>
+                                    <div class="pipeline-label">Download Video</div>
+                                </div>
+                                <div class="pipeline-step" id="job-step-copy-{{ job.id }}">
+                                    <div class="pipeline-dot">3</div>
+                                    <div class="pipeline-label">AI Copy</div>
+                                </div>
+                                <div class="pipeline-step" id="job-step-publish-{{ job.id }}">
+                                    <div class="pipeline-dot">4</div>
+                                    <div class="pipeline-label">Publish/Schedule</div>
+                                </div>
+                            </div>
+
+                            {% if job.error %}
+                            <div class="job-error-banner" id="job-error-{{ job.id }}">
+                                <svg class="icon icon-sm" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                <span>{{ job.error }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if job.status == 'failed' %}
+                            <div class="job-actions" style="margin-top: 2px; display: flex; justify-content: flex-end;">
+                                <button class="btn btn-secondary btn-sm" onclick="retryJob({{ job.id }})">
+                                    <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                    Retry Run
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <svg class="icon icon-lg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            </div>
+                            <div class="empty-state-text">No active runs or recent pipelines found. Paste an Amazon affiliate link in the Link Hub to start!</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

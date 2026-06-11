@@ -14,22 +14,24 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="logo-icon">📌</div>
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;stroke:none;"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+                    </div>
                     <div class="logo-text">PinBot</div>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
                 <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" id="nav-dashboard">
-                    <span class="nav-icon">🏠</span>
+                    <svg class="icon" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     Dashboard
                 </a>
                 <a href="/pins" class="nav-link {% if active_page == 'pins' %}active{% endif %}" id="nav-pins">
-                    <span class="nav-icon">📎</span>
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.71A2 2 0 0 1 15 9.05V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.05a2 2 0 0 1-.78 1.26l-2.78 3.71A2 2 0 0 0 5 15.24z"></path></svg>
                     Pins
                 </a>
                 <a href="/settings" class="nav-link {% if active_page == 'settings' %}active{% endif %}" id="nav-settings">
-                    <span class="nav-icon">⚙️</span>
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                     Settings
                 </a>
             </nav>
@@ -37,7 +39,7 @@
             <div class="sidebar-footer">
                 <div class="connection-status">
                     <span class="connection-dot {% if pinterest_connected %}connected{% endif %}"></span>
-                    <span>Pinterest {% if pinterest_connected %}Connected{% else %}Not Connected{% endif %}</span>
+                    <span>Pinterest Connected</span>
                 </div>
             </div>
         </aside>
@@ -51,12 +53,14 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Modal Overlay -->
+    <!-- Slidesheet Drawer Overlay -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="modal">
             <div class="modal-header">
                 <h3 class="modal-title" id="modal-title"></h3>
-                <button class="btn-icon btn-secondary" onclick="closeModal()">✕</button>
+                <button class="btn-icon btn-secondary" onclick="closeModal()">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
             <div class="modal-body" id="modal-body"></div>
             <div class="modal-footer" id="modal-footer"></div>
