@@ -1,0 +1,64 @@
+[project]
+name = "pinterest-automation"
+version = "0.1.0"
+description = "Automated Pinterest pin creation from Amazon affiliate links + TikTok videos"
+requires-python = ">=3.11"
+dependencies = [
+    # Web framework
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.18",
+
+    # Templating
+    "jinja2>=3.1.4",
+
+    # Database
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14.0",
+    "aiosqlite>=0.20.0",
+
+    # Task queue
+    "celery[redis]>=5.4.0",
+    "redis>=5.2.0",
+    "flower>=2.0.1",
+
+    # HTTP client
+    "httpx>=0.28.0",
+
+    # Scraping
+    "beautifulsoup4>=4.12.3",
+    "lxml>=5.3.0",
+    "playwright>=1.49.0",
+
+    # Video download
+    "yt-dlp>=2024.12.0",
+
+    # AI
+    "google-genai>=1.0.0",
+
+    # Config
+    "pydantic-settings>=2.7.0",
+    "python-dotenv>=1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-httpx>=0.34.0",
+    "ruff>=0.8.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

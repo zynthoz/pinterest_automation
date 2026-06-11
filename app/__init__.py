@@ -1,0 +1,1 @@
+"""Pinterest Automation Tool."""

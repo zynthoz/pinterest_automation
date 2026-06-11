@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Paste Amazon affiliate links to create Pinterest pins automatically</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Active Jobs</div>
+        <div class="stat-value info" id="stat-active">{{ stats.active_jobs }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value success" id="stat-completed">{{ stats.completed_jobs }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Failed</div>
+        <div class="stat-value error" id="stat-failed">{{ stats.failed_jobs }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Published Pins</div>
+        <div class="stat-value success" id="stat-published">{{ stats.published_pins }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Scheduled</div>
+        <div class="stat-value scheduled" id="stat-scheduled">{{ stats.scheduled_pins }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Jobs</div>
+        <div class="stat-value" id="stat-total">{{ stats.total_jobs }}</div>
+    </div>
+</div>
+
+<!-- URL Input Section -->
+<div class="input-section">
+    <div class="input-section-title">
+        🔗 Add Amazon Affiliate Links
+    </div>
+
+    <!-- Single / Bulk tabs -->
+    <div class="input-tabs">
+        <button class="input-tab active" id="tab-single" onclick="switchTab('single')">Single URL</button>
+        <button class="input-tab" id="tab-bulk" onclick="switchTab('bulk')">Bulk Paste</button>
+    </div>
+
+    <!-- Single URL input -->
+    <div id="input-single">
+        <div class="input-row">
+            <input
+                type="url"
+                class="input-field"
+                id="single-url-input"
+                placeholder="https://www.amazon.com/dp/B0XXXXXXXX?tag=yourtag-20"
+                autofocus
+            >
+            <button class="btn btn-primary" id="btn-add-single" onclick="submitSingle()">
+                <span id="btn-add-text">Add & Process</span>
+                <div class="spinner hidden" id="btn-add-spinner"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bulk URL input -->
+    <div id="input-bulk" class="hidden">
+        <textarea
+            class="input-field"
+            id="bulk-url-input"
+            placeholder="Paste one Amazon URL per line...&#10;https://www.amazon.com/dp/B0XXXXXXXX?tag=yourtag-20&#10;https://amzn.to/xxxxx&#10;https://www.amazon.com/dp/B0YYYYYYYY?tag=yourtag-20"
+            rows="5"
+        ></textarea>
+        <div style="display: flex; justify-content: flex-end; margin-top: var(--space-md); gap: var(--space-sm);">
+            <span class="text-muted" style="font-size: 0.78rem; align-self: center;" id="bulk-count">0 URLs detected</span>
+            <button class="btn btn-primary" id="btn-add-bulk" onclick="submitBulk()">
+                <span id="btn-bulk-text">Queue All</span>
+                <div class="spinner hidden" id="btn-bulk-spinner"></div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Jobs List -->
+<div class="jobs-section">
+    <div class="section-header">
+        <h2 class="section-title">Recent Jobs</h2>
+        <button class="btn btn-secondary btn-sm" onclick="refreshJobs()">↻ Refresh</button>
+    </div>
+
+    <div class="jobs-list" id="jobs-list">
+        {% if jobs %}
+            {% for job in jobs %}
+            <div class="job-card" id="job-{{ job.id }}" data-status="{{ job.status }}">
+                {% if job.product_image %}
+                <img class="job-product-img" src="{{ job.product_image }}" alt="Product">
+                {% else %}
+                <div class="job-product-img" style="display:flex;align-items:center;justify-content:center;font-size:1.3rem;">📦</div>
+                {% endif %}
+
+                <div class="job-info">
+                    <div class="job-title">{{ job.product_title or 'Processing...' }}</div>
+                    <div class="job-url truncate">{{ job.affiliate_url }}</div>
+                    {% if job.current_step %}
+                    <div class="job-step">{{ job.current_step }}</div>
+                    {% endif %}
+                    {% if job.error %}
+                    <div class="job-step text-error">{{ job.error[:100] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="job-status">
+                    {% include "components/job_badge.html" %}
+                </div>
+
+                <div class="job-actions">
+                    {% if job.status == 'failed' %}
+                    <button class="btn btn-secondary btn-sm" onclick="retryJob({{ job.id }})">↻ Retry</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📌</div>
+                <div class="empty-state-text">No jobs yet. Paste an Amazon link above to get started!</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Start polling for job updates
+    startJobPolling();
+</script>
+{% endblock %}

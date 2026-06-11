@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% set active_page = "settings" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Configure your Pinterest connection, scheduling, and preferences</p>
+</div>
+
+<!-- Pinterest Connection -->
+<div class="settings-group">
+    <div class="settings-group-title">📌 Pinterest Connection</div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Connection Status</div>
+            <div class="settings-desc">Connect your Pinterest Business account via OAuth</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: var(--space-md);">
+            {% if pinterest_connected %}
+            <span class="badge badge-completed">✓ Connected</span>
+            {% else %}
+            <span class="badge badge-failed">Not Connected</span>
+            <button class="btn btn-primary btn-sm" onclick="connectPinterest()">Connect Pinterest</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Board ID</div>
+            <div class="settings-desc">Target Pinterest board for pin publishing</div>
+        </div>
+        <div class="settings-value">{{ pinterest_board_id or '—' }}</div>
+    </div>
+
+    {% if pinterest_connected %}
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Available Boards</div>
+            <div class="settings-desc">Fetch your boards to find the correct Board ID</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="fetchBoards()">Fetch Boards</button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Scheduling -->
+<div class="settings-group">
+    <div class="settings-group-title">🕐 Scheduling</div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Pins Per Day</div>
+            <div class="settings-desc">Randomized between min and max to appear natural</div>
+        </div>
+        <div class="settings-value">{{ pins_per_day_min }} – {{ pins_per_day_max }}</div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Active Hours</div>
+            <div class="settings-desc">Pins are scheduled only within these hours</div>
+        </div>
+        <div class="settings-value">{{ schedule_start_hour }}:00 – {{ schedule_end_hour }}:00</div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Timezone</div>
+            <div class="settings-desc">All scheduling uses this timezone</div>
+        </div>
+        <div class="settings-value">{{ timezone }}</div>
+    </div>
+</div>
+
+<!-- AI Configuration -->
+<div class="settings-group">
+    <div class="settings-group-title">🤖 AI Configuration</div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Gemini Model</div>
+            <div class="settings-desc">Model used for generating pin titles, descriptions, and hashtags</div>
+        </div>
+        <div class="settings-value">{{ gemini_model }}</div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">API Key</div>
+            <div class="settings-desc">Set GEMINI_API_KEY in your .env file</div>
+        </div>
+        <div class="settings-value">{{ '•••••••' if gemini_model else 'Not Set' }}</div>
+    </div>
+</div>
+
+<!-- Help -->
+<div class="settings-group">
+    <div class="settings-group-title">ℹ️ Configuration</div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">How to Update Settings</div>
+            <div class="settings-desc" style="max-width: 500px;">
+                All settings are configured via the <code style="color: var(--accent-primary);">.env</code> file
+                in the project root. Edit the file and restart the server to apply changes.
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div>
+            <div class="settings-label">Celery Workers</div>
+            <div class="settings-desc">Monitor workers via Flower dashboard</div>
+        </div>
+        <a href="http://localhost:5555" target="_blank" class="btn btn-secondary btn-sm">Open Flower →</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function connectPinterest() {
+        try {
+            const resp = await fetch('/api/auth/pinterest');
+            const data = await resp.json();
+            if (data.auth_url) {
+                window.open(data.auth_url, '_blank');
+                showToast('Opening Pinterest authorization...', 'info');
+            } else {
+                showToast(data.detail || 'Failed to get auth URL', 'error');
+            }
+        } catch (e) {
+            showToast('Error connecting to Pinterest', 'error');
+        }
+    }
+
+    async function fetchBoards() {
+        try {
+            const resp = await fetch('/api/auth/pinterest/boards');
+            const data = await resp.json();
+            if (data.boards && data.boards.length > 0) {
+                let html = '<div style="margin-bottom: var(--space-md);">Copy the desired Board ID to your .env file:</div>';
+                html += '<div style="display:flex;flex-direction:column;gap:var(--space-sm);">';
+                for (const board of data.boards) {
+                    html += `<div class="settings-row" style="padding: var(--space-sm);">
+                        <div>
+                            <div class="settings-label">${board.name}</div>
+                        </div>
+                        <div class="settings-value" style="font-size: 0.78rem;">${board.id}</div>
+                    </div>`;
+                }
+                html += '</div>';
+                showModal('Your Pinterest Boards', html);
+            } else {
+                showToast('No boards found', 'warning');
+            }
+        } catch (e) {
+            showToast('Error fetching boards', 'error');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% set active_page = "pins" %}
+
+{% block title %}Pins{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Pins</h1>
+    <p class="page-subtitle">Manage your Pinterest pins — published, scheduled, and drafts</p>
+</div>
+
+{% if pins %}
+<div style="overflow-x: auto;">
+    <table class="pins-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Product</th>
+                <th>Status</th>
+                <th>Scheduled</th>
+                <th>Posted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pin in pins %}
+            <tr id="pin-row-{{ pin.id }}">
+                <td class="pin-title-cell" title="{{ pin.title }}">{{ pin.title }}</td>
+                <td>
+                    {% if pin.product_title %}
+                    <span class="truncate" style="max-width: 200px; display: inline-block;">{{ pin.product_title }}</span>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if pin.status == 'published' %}
+                    <span class="badge badge-published">✓ Published</span>
+                    {% elif pin.status == 'scheduled' %}
+                    <span class="badge badge-scheduled">🕐 Scheduled</span>
+                    {% elif pin.status == 'failed' %}
+                    <span class="badge badge-failed">✕ Failed</span>
+                    {% elif pin.status == 'publishing' %}
+                    <span class="badge badge-active"><span class="badge-dot"></span> Publishing</span>
+                    {% else %}
+                    <span class="badge badge-draft">📝 Draft</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if pin.scheduled_at %}
+                    <span class="text-secondary" style="font-size: 0.82rem;">{{ pin.scheduled_at.strftime('%b %d, %H:%M') }}</span>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if pin.posted_at %}
+                    <span class="text-secondary" style="font-size: 0.82rem;">{{ pin.posted_at.strftime('%b %d, %H:%M') }}</span>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn btn-secondary btn-sm" onclick="showPinDetail({{ pin.id }})" title="View details">👁</button>
+                        {% if pin.pinterest_pin_id %}
+                        <a class="btn btn-secondary btn-sm" href="https://www.pinterest.com/pin/{{ pin.pinterest_pin_id }}" target="_blank" title="View on Pinterest">↗</a>
+                        {% endif %}
+                        <button class="btn btn-danger btn-sm" onclick="deletePin({{ pin.id }})" title="Delete">🗑</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📎</div>
+    <div class="empty-state-text">No pins yet. Submit an Amazon link from the Dashboard to create your first pin.</div>
+    <a href="/" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endif %}
+{% endblock %}

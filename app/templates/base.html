@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pinterest Automation Tool — Create affiliate pins from Amazon products and TikTok videos">
+    <title>{% block title %}Dashboard{% endblock %} — PinBot</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">📌</div>
+                    <div class="logo-text">Pin<span>Bot</span></div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                    <span class="nav-icon">🏠</span>
+                    Dashboard
+                </a>
+                <a href="/pins" class="nav-link {% if active_page == 'pins' %}active{% endif %}" id="nav-pins">
+                    <span class="nav-icon">📎</span>
+                    Pins
+                </a>
+                <a href="/settings" class="nav-link {% if active_page == 'settings' %}active{% endif %}" id="nav-settings">
+                    <span class="nav-icon">⚙️</span>
+                    Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="connection-status">
+                    <span class="connection-dot {% if pinterest_connected %}connected{% endif %}"></span>
+                    <span>Pinterest {% if pinterest_connected %}Connected{% else %}Not Connected{% endif %}</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title"></h3>
+                <button class="btn-icon btn-secondary" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
