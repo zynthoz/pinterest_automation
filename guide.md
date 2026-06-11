@@ -49,24 +49,37 @@ Open the local `.env` file in the root of the project and fill in your keys:
 
 ## Step 3: Start Services
 
-You need **three** terminal tabs/windows running in the virtual environment to run the full application:
+You can start all required services (Redis, Celery worker + scheduler, and FastAPI) using a single command:
 
-### Tab 1: Redis Server
-Ensure Redis is running on your machine:
+```bash
+./start.sh
+```
+
+This script will:
+1. Verify the virtual environment is present.
+2. Check if Redis is running, and start a local daemonized instance if it isn't.
+3. Start the Celery worker with the Beat scheduler enabled.
+4. Launch the FastAPI/Uvicorn server.
+5. Gracefully stop all services when you press `Ctrl+C`.
+
+---
+
+### Alternative: Manual/Separate Services (For debugging)
+
+If you prefer to run services in separate terminals, you can do so:
+
+#### Tab 1: Redis Server
 ```bash
 sudo systemctl start redis
 ```
-*(To enable it automatically on system boot: `sudo systemctl enable --now redis`)*
 
-### Tab 2: Celery Worker
-Start the Celery worker to handle background tasks (scraping, downloading, generating, posting):
+#### Tab 2: Celery Worker (with Beat)
 ```bash
 source .venv/bin/activate
-celery -A app.workers.celery_app worker --loglevel=info
+celery -A app.workers.celery_app worker -B --loglevel=info
 ```
 
-### Tab 3: FastAPI Web Server
-Start the web dashboard server:
+#### Tab 3: FastAPI Web Server
 ```bash
 source .venv/bin/activate
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
