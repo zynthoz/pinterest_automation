@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.0-flash-lite"
 
+    # --- Playwright ---
+    playwright_headless: bool = True
+
     # --- Pinterest API ---
     pinterest_app_id: str = ""
     pinterest_app_secret: str = ""

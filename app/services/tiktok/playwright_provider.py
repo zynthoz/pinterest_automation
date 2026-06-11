@@ -12,6 +12,7 @@ import time
 
 from playwright.sync_api import Browser, Playwright, sync_playwright
 
+from app.config import settings
 from app.services.tiktok.base import TikTokProvider, TikTokResult
 
 logger = logging.getLogger(__name__)
@@ -30,42 +31,40 @@ class PlaywrightTikTokProvider(TikTokProvider):
 
     def __init__(self):
         self._playwright: Playwright | None = None
-        self._browser: Browser | None = None
+        self._context = None
 
-    def _ensure_browser(self) -> Browser:
-        """Lazily launch browser on first use."""
-        if self._browser is None:
+    def _ensure_context(self):
+        """Lazily launch persistent browser context on first use."""
+        from pathlib import Path
+        if self._context is None:
             self._playwright = sync_playwright().start()
             viewport = random.choice(VIEWPORTS)
-            self._browser = self._playwright.chromium.launch(
-                headless=True,
+            user_data_dir = str(Path.cwd() / "playwright_session")
+            
+            self._context = self._playwright.chromium.launch_persistent_context(
+                user_data_dir=user_data_dir,
+                headless=settings.playwright_headless,
                 args=[
                     "--disable-blink-features=AutomationControlled",
                     "--no-sandbox",
                     "--disable-dev-shm-usage",
                 ],
+                viewport=viewport,
+                user_agent=(
+                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+                ),
+                locale="en-US",
+                timezone_id="America/New_York",
             )
-            logger.info("Launched Playwright Chromium (viewport: %s)", viewport)
-        return self._browser
+            logger.info("Launched persistent Playwright Chromium at %s", user_data_dir)
+        return self._context
 
     def search(self, query: str, max_results: int = 10) -> list[TikTokResult]:
         """
         Search TikTok for videos matching the query.
-
-        Navigates to TikTok search page, waits for results to load,
-        and scrapes video cards for metadata.
         """
-        browser = self._ensure_browser()
-        viewport = random.choice(VIEWPORTS)
-        context = browser.new_context(
-            viewport=viewport,
-            user_agent=(
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-            ),
-            locale="en-US",
-            timezone_id="America/New_York",
-        )
+        context = self._ensure_context()
         page = context.new_page()
 
         # Mask webdriver detection
@@ -242,9 +241,9 @@ class PlaywrightTikTokProvider(TikTokProvider):
 
     def close(self) -> None:
         """Shut down the browser."""
-        if self._browser:
-            self._browser.close()
-            self._browser = None
+        if self._context:
+            self._context.close()
+            self._context = None
         if self._playwright:
             self._playwright.stop()
             self._playwright = None
@@ -269,11 +268,21 @@ def _parse_count(text: str) -> int:
 def build_search_query(brand: str | None, title: str | None) -> str:
     """Build a TikTok search query from product info."""
     parts = []
-    if brand:
-        parts.append(brand)
-    if title:
+    
+    # Normalize inputs by removing punctuation
+    brand_clean = re.sub(r'[^\w\s]', '', brand or '').strip()
+    title_clean = re.sub(r'[^\w\s]', '', title or '').strip()
+    
+    if brand_clean:
+        parts.append(brand_clean)
+        
+    if title_clean:
         # Take first ~5 meaningful words from title
-        words = title.split()[:5]
+        words = title_clean.split()[:5]
+        # Avoid duplicating the brand if the title already starts with the brand name
+        if brand_clean and words and words[0].lower() == brand_clean.lower():
+            words = words[1:]
         parts.extend(words)
+        
     parts.append("review")
-    return " ".join(parts)
+    return " ".join([p for p in parts if p]).strip()

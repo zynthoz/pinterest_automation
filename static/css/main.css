@@ -8,45 +8,45 @@
 /* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
     /* Background layers */
-    --bg-base: #0a0a0f;
-    --bg-surface: #12121a;
-    --bg-elevated: #1a1a28;
-    --bg-card: rgba(26, 26, 40, 0.7);
-    --bg-card-hover: rgba(30, 30, 48, 0.85);
-    --bg-glass: rgba(255, 255, 255, 0.03);
-    --bg-input: rgba(255, 255, 255, 0.06);
+    --bg-base: #f9f9f9;
+    --bg-surface: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f5f5;
+    --bg-glass: rgba(0, 0, 0, 0.03);
+    --bg-input: #f0f0f0;
 
     /* Borders */
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.1);
-    --border-hover: rgba(255, 255, 255, 0.15);
-    --border-focus: rgba(227, 68, 94, 0.5);
+    --border-subtle: #efefef;
+    --border-default: #e0e0e0;
+    --border-hover: #cccccc;
+    --border-focus: rgba(230, 0, 35, 0.5);
 
     /* Text */
-    --text-primary: #f0f0f5;
-    --text-secondary: #9a9ab0;
-    --text-muted: #5e5e76;
-    --text-inverse: #0a0a0f;
+    --text-primary: #111111;
+    --text-secondary: #767676;
+    --text-muted: #a5a5a5;
+    --text-inverse: #ffffff;
 
-    /* Accent — Pinterest red-rose gradient */
-    --accent-primary: #e3445e;
-    --accent-secondary: #bd254c;
-    --accent-gradient: linear-gradient(135deg, #e3445e 0%, #bd254c 50%, #8b1a3a 100%);
-    --accent-glow: rgba(227, 68, 94, 0.2);
+    /* Accent — Pinterest solid red */
+    --accent-primary: #e60023;
+    --accent-secondary: #ad081b;
+    --accent-gradient: #e60023; /* fallback to solid for places using gradient */
+    --accent-glow: rgba(230, 0, 35, 0.1);
 
     /* Status colors */
-    --status-success: #34d399;
-    --status-success-bg: rgba(52, 211, 153, 0.1);
-    --status-warning: #fbbf24;
-    --status-warning-bg: rgba(251, 191, 36, 0.1);
-    --status-error: #f87171;
-    --status-error-bg: rgba(248, 113, 113, 0.1);
-    --status-info: #60a5fa;
-    --status-info-bg: rgba(96, 165, 250, 0.1);
-    --status-scheduled: #a78bfa;
-    --status-scheduled-bg: rgba(167, 139, 250, 0.1);
-    --status-active: #38bdf8;
-    --status-active-bg: rgba(56, 189, 248, 0.1);
+    --status-success: #008000;
+    --status-success-bg: rgba(0, 128, 0, 0.1);
+    --status-warning: #ffa500;
+    --status-warning-bg: rgba(255, 165, 0, 0.1);
+    --status-error: #e60023;
+    --status-error-bg: rgba(230, 0, 35, 0.1);
+    --status-info: #0000ff;
+    --status-info-bg: rgba(0, 0, 255, 0.1);
+    --status-scheduled: #800080;
+    --status-scheduled-bg: rgba(128, 0, 128, 0.1);
+    --status-active: #0000ff;
+    --status-active-bg: rgba(0, 0, 255, 0.1);
 
     /* Spacing */
     --space-xs: 0.25rem;
@@ -57,17 +57,17 @@
     --space-2xl: 3rem;
 
     /* Radius */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
     --radius-full: 9999px;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 30px rgba(227, 68, 94, 0.15);
+    /* Shadows - Clean, minimal shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 2px 8px rgba(230, 0, 35, 0.15);
 
     /* Transitions */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,22 +104,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Ambient background gradient */
-body::before {
-    content: '';
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background:
-        radial-gradient(ellipse at 20% 20%, rgba(227, 68, 94, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(56, 189, 248, 0.03) 0%, transparent 50%);
-    z-index: -1;
-    pointer-events: none;
-}
-
 a {
     color: var(--accent-primary);
     text-decoration: none;
@@ -127,7 +111,7 @@ a {
 }
 
 a:hover {
-    color: var(--text-primary);
+    color: var(--accent-secondary);
 }
 
 /* ─── Layout ────────────────────────────────────────────────── */
@@ -163,25 +147,22 @@ a:hover {
 }
 
 .sidebar-logo .logo-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-md);
-    background: var(--accent-gradient);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
-    box-shadow: var(--shadow-glow);
+    font-size: 1rem;
 }
 
 .sidebar-logo .logo-text {
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.1rem;
     letter-spacing: -0.02em;
-}
-
-.sidebar-logo .logo-text span {
-    color: var(--accent-primary);
+    color: var(--text-primary);
 }
 
 .sidebar-nav {
@@ -197,40 +178,20 @@ a:hover {
     align-items: center;
     gap: var(--space-md);
     padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all var(--transition-fast);
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-link::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%) scaleY(0);
-    width: 3px;
-    height: 60%;
-    background: var(--accent-gradient);
     border-radius: var(--radius-full);
-    transition: transform var(--transition-base);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
 }
 
 .nav-link:hover {
-    color: var(--text-primary);
-    background: var(--bg-glass);
+    background: var(--bg-card-hover);
 }
 
 .nav-link.active {
+    background: var(--bg-input);
     color: var(--text-primary);
-    background: rgba(227, 68, 94, 0.08);
-}
-
-.nav-link.active::before {
-    transform: translateY(-50%) scaleY(1);
 }
 
 .nav-icon {
@@ -306,7 +267,6 @@ a:hover {
 
 .stat-card {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
@@ -315,26 +275,10 @@ a:hover {
     overflow: hidden;
 }
 
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--accent-gradient);
-    opacity: 0;
-    transition: opacity var(--transition-base);
-}
-
 .stat-card:hover {
     border-color: var(--border-hover);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-}
-
-.stat-card:hover::before {
-    opacity: 1;
 }
 
 .stat-label {
@@ -362,7 +306,6 @@ a:hover {
 /* ─── Input Section ─────────────────────────────────────────── */
 .input-section {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
@@ -394,11 +337,11 @@ a:hover {
     flex: 1;
     background: var(--bg-input);
     border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    padding: var(--space-sm) var(--space-lg);
     color: var(--text-primary);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     transition: all var(--transition-fast);
     outline: none;
 }
@@ -409,10 +352,12 @@ a:hover {
 
 .input-field:focus {
     border-color: var(--accent-primary);
+    background: var(--bg-surface);
     box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 textarea.input-field {
+    border-radius: var(--radius-md); /* Textareas shouldn't be pill shaped */
     resize: vertical;
     min-height: 100px;
     line-height: 1.8;
@@ -427,24 +372,23 @@ textarea.input-field {
 .input-tab {
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
     background: transparent;
-    border: 1px solid var(--border-subtle);
+    border: none;
     color: var(--text-secondary);
     transition: all var(--transition-fast);
 }
 
 .input-tab:hover {
-    border-color: var(--border-hover);
+    background: var(--bg-input);
     color: var(--text-primary);
 }
 
 .input-tab.active {
-    background: var(--accent-gradient);
-    border-color: transparent;
-    color: white;
+    background: var(--text-primary);
+    color: var(--text-inverse);
 }
 
 /* ─── Buttons ───────────────────────────────────────────────── */
@@ -455,29 +399,27 @@ textarea.input-field {
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-lg);
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
     font-family: inherit;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: transform var(--transition-fast), background var(--transition-fast);
     outline: none;
     white-space: nowrap;
 }
 
 .btn-primary {
-    background: var(--accent-gradient);
+    background: var(--accent-primary);
     color: white;
-    box-shadow: 0 2px 12px rgba(227, 68, 94, 0.3);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(227, 68, 94, 0.4);
+    background: var(--accent-secondary);
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 .btn-primary:disabled {
@@ -559,9 +501,8 @@ textarea.input-field {
 
 .job-card {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     padding: var(--space-md) var(--space-lg);
     display: flex;
     align-items: center;
@@ -759,7 +700,6 @@ textarea.input-field {
 
 .toast {
     background: var(--bg-elevated);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     padding: var(--space-md) var(--space-lg);
@@ -831,8 +771,7 @@ textarea.input-field {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 500;
     display: flex;
     align-items: center;
@@ -890,7 +829,6 @@ textarea.input-field {
 /* ─── Settings Page ─────────────────────────────────────────── */
 .settings-group {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
