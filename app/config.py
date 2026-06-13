@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     pinterest_access_token: str = ""
     pinterest_refresh_token: str = ""
     pinterest_board_id: str = ""
+    pinterest_board_name: str = ""  # Display name of the board (for Playwright web posting)
 
     # --- Redis ---
     redis_url: str = "redis://localhost:6379/0"

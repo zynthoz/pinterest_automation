@@ -1,2 +1,3 @@
-2026/06/11-17:15:46.434 4871 Creating DB /home/aaronlime/code/pinterest_automation/playwright_session/Default/shared_proto_db/metadata since it was missing.
-2026/06/11-17:15:46.455 4871 Reusing MANIFEST /home/aaronlime/code/pinterest_automation/playwright_session/Default/shared_proto_db/metadata/MANIFEST-000001
+2026/06/13-17:18:11.218 23d14 Reusing MANIFEST /home/aaronlime/code/pinterest_automation/playwright_session/Default/shared_proto_db/metadata/MANIFEST-000001
+2026/06/13-17:18:11.218 23d14 Recovering log #3
+2026/06/13-17:18:11.218 23d14 Reusing old log /home/aaronlime/code/pinterest_automation/playwright_session/Default/shared_proto_db/metadata/000003.log 

@@ -47,13 +47,29 @@ def search_tiktok(self, job_id: int, product_id: int) -> dict:
         if not product:
             raise ValueError(f"Product {product_id} not found")
 
+        # Check if we already have search results for this product
+        existing_video = db.query(TikTokVideo).filter(
+            TikTokVideo.product_id == product_id,
+            TikTokVideo.selected == True
+        ).first()
+        if existing_video:
+            logger.info("TikTok search already completed. Using existing selected video ID %d", existing_video.id)
+            return {"selected_video_id": existing_video.id}
+
         # Build search query
         query = build_search_query(product.brand, product.title)
         logger.info("TikTok search query: %s", query)
 
         # Search using Playwright provider
+        def on_progress(message: str):
+            try:
+                job.current_step = message
+                db.commit()
+            except Exception as e:
+                logger.warning("Failed to update progress: %s", e)
+
         provider = PlaywrightTikTokProvider()
-        results = provider.search(query, max_results=10)
+        results = provider.search(query, max_results=10, on_progress=on_progress)
 
         if not results:
             raise ValueError(f"No TikTok videos found for query: {query}")
@@ -123,8 +139,25 @@ def download_tiktok_video(self, job_id: int, video_id: int, asin: str) -> dict:
         if not video:
             raise ValueError(f"TikTokVideo {video_id} not found")
 
+        # Check if video is already downloaded and the file exists on disk
+        from pathlib import Path
+        if video.local_path and Path(video.local_path).exists():
+            logger.info("Video %d already downloaded at: %s", video_id, video.local_path)
+            return {
+                "local_path": video.local_path,
+                "duration_seconds": video.duration_seconds or 0,
+                "video_id": video_id,
+            }
+
         # Download the video
-        result = download_video(video.video_url, asin)
+        def on_progress(message: str):
+            try:
+                job.current_step = message
+                db.commit()
+            except Exception as e:
+                logger.warning("Failed to update progress: %s", e)
+
+        result = download_video(video.video_url, asin, on_progress=on_progress)
 
         # Update video record with local path
         video.local_path = result["local_path"]

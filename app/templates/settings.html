@@ -9,131 +9,145 @@
     <p class="page-subtitle">Configure your Pinterest connection, scheduling, and preferences</p>
 </div>
 
-<!-- Pinterest Connection Settings -->
-<div class="settings-section">
-    <h2 class="settings-section-title">
-        <svg class="icon icon-accent" viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.71A2 2 0 0 1 15 9.05V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.05a2 2 0 0 1-.78 1.26l-2.78 3.71A2 2 0 0 0 5 15.24z"></path></svg>
-        Pinterest Integration
-    </h2>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Connection Status</div>
-            <div class="settings-desc">Connect your Pinterest Business account via secure OAuth 2.0</div>
+<div class="settings-container">
+    <!-- Pinterest Connection Settings -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <svg class="icon icon-accent" viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.71A2 2 0 0 1 15 9.05V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.05a2 2 0 0 1-.78 1.26l-2.78 3.71A2 2 0 0 0 5 15.24z"></path></svg>
+                Pinterest Integration
+            </h2>
         </div>
-        <div style="display: flex; align-items: center; gap: var(--space-md);">
+        <div class="panel-body panel-body-settings">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Connection Status</div>
+                    <div class="settings-desc">Connect your Pinterest Business account via secure OAuth 2.0</div>
+                </div>
+                <div class="flex-align-center">
+                    {% if pinterest_connected %}
+                    <span class="badge badge-completed">Connected</span>
+                    {% else %}
+                    <span class="badge badge-failed">Disconnected</span>
+                    <button class="btn btn-primary btn-sm" onclick="connectPinterest()">Connect Account</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Active Board ID</div>
+                    <div class="settings-desc">Target Pinterest board where the automated pins are published</div>
+                </div>
+                <div class="settings-value font-mono text-sm">{{ pinterest_board_id or '—' }}</div>
+            </div>
+
             {% if pinterest_connected %}
-            <span class="badge badge-completed">Connected</span>
-            {% else %}
-            <span class="badge badge-failed">Disconnected</span>
-            <button class="btn btn-primary btn-sm" onclick="connectPinterest()">Connect Account</button>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Available Pinterest Boards</div>
+                    <div class="settings-desc">Fetch and display target boards associated with your account</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="fetchBoards()">Fetch Boards</button>
+            </div>
             {% endif %}
         </div>
     </div>
 
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Active Board ID</div>
-            <div class="settings-desc">Target Pinterest board where the automated pins are published</div>
+    <!-- Scheduling Settings -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Queue & Scheduling
+            </h2>
         </div>
-        <div class="settings-value" style="font-family: monospace; font-size: 0.85rem;">{{ pinterest_board_id or '—' }}</div>
-    </div>
+        <div class="panel-body panel-body-settings">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Pins Per Day Range</div>
+                    <div class="settings-desc">Randomized interval to emulate organic sharing patterns</div>
+                </div>
+                <div class="settings-value">{{ pins_per_day_min }} – {{ pins_per_day_max }} pins</div>
+            </div>
 
-    {% if pinterest_connected %}
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Available Pinterest Boards</div>
-            <div class="settings-desc">Fetch and display target boards associated with your account</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="fetchBoards()">Fetch Boards</button>
-    </div>
-    {% endif %}
-</div>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Active Publishing Windows</div>
+                    <div class="settings-desc">Pinterest boards will only receive posts during these hours</div>
+                </div>
+                <div class="settings-value">{{ schedule_start_hour }}:00 – {{ schedule_end_hour }}:00</div>
+            </div>
 
-<!-- Scheduling Settings -->
-<div class="settings-section">
-    <h2 class="settings-section-title">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        Queue & Scheduling
-    </h2>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Pins Per Day Range</div>
-            <div class="settings-desc">Randomized interval to emulate organic sharing patterns</div>
-        </div>
-        <div class="settings-value">{{ pins_per_day_min }} – {{ pins_per_day_max }} pins</div>
-    </div>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Active Publishing Windows</div>
-            <div class="settings-desc">Pinterest boards will only receive posts during these hours</div>
-        </div>
-        <div class="settings-value">{{ schedule_start_hour }}:00 – {{ schedule_end_hour }}:00</div>
-    </div>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Local Timezone</div>
-            <div class="settings-desc">All system timing and cron tasks run against this timezone</div>
-        </div>
-        <div class="settings-value">{{ timezone }}</div>
-    </div>
-</div>
-
-<!-- AI Engine Config -->
-<div class="settings-section">
-    <h2 class="settings-section-title">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-        AI Copy Generation
-    </h2>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Gemini AI Model</div>
-            <div class="settings-desc">Active generative model responsible for copywriting and hashtags</div>
-        </div>
-        <div class="settings-value">{{ gemini_model }}</div>
-    </div>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">API Key Configuration</div>
-            <div class="settings-desc">Credential key used for API access to Google AI Studio</div>
-        </div>
-        <div class="settings-value">
-            {% if gemini_model %}
-            <span class="badge badge-completed">Configured (.env)</span>
-            {% else %}
-            <span class="badge badge-failed">Not Set (.env)</span>
-            {% endif %}
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Local Timezone</div>
+                    <div class="settings-desc">All system timing and cron tasks run against this timezone</div>
+                </div>
+                <div class="settings-value">{{ timezone }}</div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Technical Monitoring -->
-<div class="settings-section">
-    <h2 class="settings-section-title">
-        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
-        System & Background Tasks
-    </h2>
-
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Task Queue (Celery / Redis)</div>
-            <div class="settings-desc">Monitor pipeline worker execution queue real-time statistics</div>
+    <!-- AI Engine Config -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                AI Copy Generation
+            </h2>
         </div>
-        <a href="http://localhost:5555" target="_blank" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px;">
-            Open Flower
-            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-        </a>
+        <div class="panel-body panel-body-settings">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Gemini AI Model</div>
+                    <div class="settings-desc">Active generative model responsible for copywriting and hashtags</div>
+                </div>
+                <div class="settings-value">{{ gemini_model }}</div>
+            </div>
+
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">API Key Configuration</div>
+                    <div class="settings-desc">Credential key used for API access to Google AI Studio</div>
+                </div>
+                <div class="settings-value">
+                    {% if gemini_model %}
+                    <span class="badge badge-completed">Configured (.env)</span>
+                    {% else %}
+                    <span class="badge badge-failed">Not Set (.env)</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="settings-row">
-        <div>
-            <div class="settings-label">Environment Configuration</div>
-            <div class="settings-desc">All system configurations are read from the root project <code>.env</code> file.</div>
+    <!-- Technical Monitoring -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                System & Background Tasks
+            </h2>
+        </div>
+        <div class="panel-body panel-body-settings">
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Task Queue (Celery / Redis)</div>
+                    <div class="settings-desc">Monitor pipeline worker execution queue real-time statistics</div>
+                </div>
+                <a href="http://localhost:5555" target="_blank" class="btn btn-secondary btn-sm flex-align-center">
+                    Open Flower
+                    <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+            </div>
+
+            <div class="settings-row">
+                <div>
+                    <div class="settings-label">Environment Configuration</div>
+                    <div class="settings-desc">All system configurations are read from the root project <code>.env</code> file.</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -161,14 +175,14 @@
             const resp = await fetch('/api/auth/pinterest/boards');
             const data = await resp.json();
             if (data.boards && data.boards.length > 0) {
-                let html = '<div style="margin-bottom: var(--space-md);">Copy the desired Board ID to your .env file:</div>';
-                html += '<div style="display:flex;flex-direction:column;gap:var(--space-sm);">';
+                let html = '<div class="mb-md">Copy the desired Board ID to your .env file:</div>';
+                html += '<div class="settings-modal-list">';
                 for (const board of data.boards) {
-                    html += `<div class="settings-row" style="padding: var(--space-sm) 0;">
+                    html += `<div class="settings-row modal-row">
                         <div>
-                            <div class="settings-label" style="font-size:0.9rem;">${board.name}</div>
+                            <div class="settings-label text-md">${board.name}</div>
                         </div>
-                        <div class="settings-value" style="font-family: monospace; font-size: 0.8rem;">${board.id}</div>
+                        <div class="settings-value font-mono text-sm">${board.id}</div>
                     </div>`;
                 }
                 html += '</div>';

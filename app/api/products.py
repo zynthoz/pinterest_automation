@@ -60,6 +60,7 @@ def create_products_bulk(payload: ProductBulkCreate, db: Session = Depends(get_d
     """
     results = []
     errors = []
+    jobs_to_dispatch = []
 
     for url in payload.affiliate_urls:
         url = url.strip()
@@ -73,10 +74,13 @@ def create_products_bulk(payload: ProductBulkCreate, db: Session = Depends(get_d
         job = Job(affiliate_url=url, status=JobStatus.QUEUED)
         db.add(job)
         db.flush()
+        jobs_to_dispatch.append(job)
 
+    db.commit()
+
+    for job in jobs_to_dispatch:
         task = run_pipeline.delay(job.id)
         job.celery_task_id = task.id
-
         results.append(
             JobResponse(
                 id=job.id,

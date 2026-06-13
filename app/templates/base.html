@@ -10,39 +10,38 @@
 </head>
 <body>
     <div class="app-layout">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <div class="logo-icon">
-                        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;stroke:none;"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+        <!-- Top Navigation Header -->
+        <header class="navbar" id="navbar">
+            <div class="navbar-container">
+                <div class="navbar-brand">
+                    <a href="/" class="logo-link">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;stroke:none;"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+                        </div>
+                        <span class="logo-text">PinBot</span>
+                    </a>
+                </div>
+
+                <nav class="navbar-nav">
+                    <a href="/" class="nav-btn {% if active_page == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                        Dashboard
+                    </a>
+                    <a href="/pins" class="nav-btn {% if active_page == 'pins' %}active{% endif %}" id="nav-pins">
+                        Pins
+                    </a>
+                    <a href="/settings" class="nav-btn {% if active_page == 'settings' %}active{% endif %}" id="nav-settings">
+                        Settings
+                    </a>
+                </nav>
+
+                <div class="navbar-status">
+                    <div class="connection-status-pill {% if pinterest_connected %}connected{% endif %}">
+                        <span class="status-dot"></span>
+                        <span class="status-text">{% if pinterest_connected %}Pinterest Connected{% else %}Pinterest Disconnected{% endif %}</span>
                     </div>
-                    <div class="logo-text">PinBot</div>
                 </div>
             </div>
-
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" id="nav-dashboard">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    Dashboard
-                </a>
-                <a href="/pins" class="nav-link {% if active_page == 'pins' %}active{% endif %}" id="nav-pins">
-                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.71A2 2 0 0 1 15 9.05V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v4.05a2 2 0 0 1-.78 1.26l-2.78 3.71A2 2 0 0 0 5 15.24z"></path></svg>
-                    Pins
-                </a>
-                <a href="/settings" class="nav-link {% if active_page == 'settings' %}active{% endif %}" id="nav-settings">
-                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    Settings
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="connection-status">
-                    <span class="connection-dot {% if pinterest_connected %}connected{% endif %}"></span>
-                    <span>Pinterest Connected</span>
-                </div>
-            </div>
-        </aside>
+        </header>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -67,7 +66,7 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/app.js?v=1.1"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

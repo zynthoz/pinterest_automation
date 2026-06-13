@@ -86,3 +86,15 @@ class TestValidateAndClean:
         result = _validate_and_clean(data, "c")
         tags = result["hashtags"].split(", ")
         assert len(tags) <= 10
+
+    def test_description_truncation(self):
+        data = {
+            "title": "Product",
+            "description": "A" * 400,
+            "hashtags": [],
+            "alt_text": "",
+        }
+        result = _validate_and_clean(data, "cool_creator")
+        assert len(result["description"]) <= 360
+        assert "Amazon Associate" in result["description"]
+        assert "@cool_creator" in result["description"]

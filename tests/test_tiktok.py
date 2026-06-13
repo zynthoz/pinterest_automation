@@ -41,49 +41,58 @@ class TestTikTokUtils:
 class TestTikTokDownloader:
     """Test TikTok downloader with mocks."""
 
-    @patch("app.services.tiktok.downloader.yt_dlp.YoutubeDL")
-    def test_get_video_info(self, mock_ytdl):
-        instance = mock_ytdl.return_value.__enter__.return_value
-        instance.extract_info.return_value = {
-            "title": "Test Title",
-            "uploader": "test_creator",
-            "duration": 60,
-            "view_count": 1000,
-            "like_count": 500,
-            "description": "Test Desc",
+    def test_get_video_info(self):
+        info = get_video_info("https://www.tiktok.com/@user/video/123456")
+        assert info["title"] == ""
+        assert info["creator"] == ""
+        assert info["duration"] == 0
+
+    @patch("app.services.tiktok.downloader.sync_playwright")
+    @patch("app.services.tiktok.downloader._extract_video_info")
+    @patch("app.services.tiktok.downloader._download_file")
+    def test_download_video_success(self, mock_download_file, mock_extract_info, mock_playwright, tmp_path):
+        from pathlib import Path
+        # Mock Playwright context & page
+        mock_pw = mock_playwright.return_value.start.return_value
+        mock_context = mock_pw.chromium.launch_persistent_context.return_value
+        mock_page = mock_context.new_page.return_value
+        mock_context.cookies.return_value = [{"name": "tt", "value": "123", "domain": ".tiktok.com"}]
+        mock_page.url = "https://www.tiktok.com/@user/video/123456"
+
+        # Mock video extraction
+        mock_extract_info.return_value = {
+            "video_src": "https://example.com/video.mp4",
+            "duration": 45,
         }
 
-        info = get_video_info("https://www.tiktok.com/@user/video/123456")
-        assert info["title"] == "Test Title"
-        assert info["creator"] == "test_creator"
-        assert info["duration"] == 60
-        assert info["view_count"] == 1000
+        # Mock downloading behavior (creates the file)
+        def fake_download(url, path, cookies, referer, *args, **kwargs):
+            Path(path).write_text("dummy mp4 content" * 100)
 
-    @patch("app.services.tiktok.downloader.yt_dlp.YoutubeDL")
-    def test_download_video_success(self, mock_ytdl, tmp_path):
-        instance = mock_ytdl.return_value.__enter__.return_value
-        instance.extract_info.side_effect = [
-            {"duration": 45},  # First call: download=False
-            {"title": "Test Title"},  # Second call: download=True
-        ]
-        
-        # Mock prepare_filename to return a path inside tmp_path
-        test_file = tmp_path / "B0CXYZ1234_123456.mp4"
-        test_file.write_text("dummy mp4 content")
-        instance.prepare_filename.return_value = str(test_file)
+        mock_download_file.side_effect = fake_download
 
         with patch("app.services.tiktok.downloader.settings") as mock_settings:
             mock_settings.downloads_path = tmp_path
             res = download_video("https://www.tiktok.com/@user/video/123456", "B0CXYZ1234")
             
-            assert res["local_path"] == str(test_file)
+            assert "B0CXYZ1234_" in res["local_path"]
             assert res["duration_seconds"] == 45
             assert res["filesize_bytes"] > 0
+            assert Path(res["local_path"]).exists()
 
-    @patch("app.services.tiktok.downloader.yt_dlp.YoutubeDL")
-    def test_download_video_too_long(self, mock_ytdl, tmp_path):
-        instance = mock_ytdl.return_value.__enter__.return_value
-        instance.extract_info.return_value = {"duration": 1000}
+    @patch("app.services.tiktok.downloader.sync_playwright")
+    @patch("app.services.tiktok.downloader._extract_video_info")
+    def test_download_video_too_long(self, mock_extract_info, mock_playwright, tmp_path):
+        mock_pw = mock_playwright.return_value.start.return_value
+        mock_context = mock_pw.chromium.launch_persistent_context.return_value
+        
+        mock_extract_info.return_value = {
+            "video_src": "https://example.com/video.mp4",
+            "duration": 1000,
+        }
 
-        with pytest.raises(ValueError, match="Video too long"):
-            download_video("https://www.tiktok.com/@user/video/123456", "B0CXYZ1234", max_duration_seconds=900)
+        with patch("app.services.tiktok.downloader.settings") as mock_settings:
+            mock_settings.downloads_path = tmp_path
+            with pytest.raises(ValueError, match="Video too long"):
+                download_video("https://www.tiktok.com/@user/video/123456", "B0CXYZ1234", max_duration_seconds=900)
+

@@ -115,8 +115,18 @@ def delete_pin(pin_id: int, db: Session = Depends(get_db)):
     # Try to delete from Pinterest if published
     if pin.pinterest_pin_id:
         try:
+            import re
+            pin_id_to_delete = pin.pinterest_pin_id
+            match = re.search(r'/pin/(\d+)', pin_id_to_delete)
+            if match:
+                pin_id_to_delete = match.group(1)
+            elif not pin_id_to_delete.isdigit():
+                digits = re.findall(r'\d+', pin_id_to_delete)
+                if digits:
+                    pin_id_to_delete = digits[-1]
+
             client = PinterestClient()
-            client.delete_pin(pin.pinterest_pin_id)
+            client.delete_pin(pin_id_to_delete)
             client.close()
         except PinterestAPIError as e:
             logger.warning("Failed to delete pin from Pinterest: %s", e)

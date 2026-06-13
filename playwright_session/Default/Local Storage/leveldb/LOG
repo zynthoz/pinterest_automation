@@ -1,2 +1,3 @@
-2026/06/11-17:15:46.311 48bc Creating DB /home/aaronlime/code/pinterest_automation/playwright_session/Default/Local Storage/leveldb since it was missing.
-2026/06/11-17:15:46.339 48bc Reusing MANIFEST /home/aaronlime/code/pinterest_automation/playwright_session/Default/Local Storage/leveldb/MANIFEST-000001
+2026/06/13-17:18:11.123 23d49 Reusing MANIFEST /home/aaronlime/code/pinterest_automation/playwright_session/Default/Local Storage/leveldb/MANIFEST-000001
+2026/06/13-17:18:11.128 23d49 Recovering log #32
+2026/06/13-17:18:11.128 23d49 Reusing old log /home/aaronlime/code/pinterest_automation/playwright_session/Default/Local Storage/leveldb/000032.log 

@@ -91,13 +91,13 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{job_id}/retry", response_model=JobResponse)
 def retry_job(job_id: int, db: Session = Depends(get_db)):
-    """Retry a failed job."""
+    """Retry a failed or completed job."""
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    if job.status != JobStatus.FAILED:
-        raise HTTPException(status_code=400, detail="Only failed jobs can be retried")
+    if job.status not in (JobStatus.FAILED, JobStatus.COMPLETED):
+        raise HTTPException(status_code=400, detail="Only failed or completed jobs can be retried/re-uploaded")
 
     # Reset job
     job.status = JobStatus.QUEUED
@@ -112,7 +112,7 @@ def retry_job(job_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(job)
 
-    logger.info("Retrying job %d", job_id)
+    logger.info("Retrying/Re-uploading job %d", job_id)
 
     return JobResponse(
         id=job.id,
@@ -123,3 +123,24 @@ def retry_job(job_id: int, db: Session = Depends(get_db)):
         current_step=job.current_step,
         started_at=job.started_at,
     )
+
+
+@router.delete("/{job_id}")
+def delete_job(job_id: int, db: Session = Depends(get_db)):
+    """Delete a job. Revokes the Celery task if it is running."""
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    # Revoke Celery task if running/queued
+    if job.celery_task_id and job.status not in (JobStatus.COMPLETED, JobStatus.FAILED):
+        try:
+            from app.workers.celery_app import celery_app
+            celery_app.control.revoke(job.celery_task_id, terminate=True)
+            logger.info("Revoked Celery task %s for job %d", job.celery_task_id, job_id)
+        except Exception as e:
+            logger.warning("Could not revoke Celery task for job %d: %s", job_id, e)
+
+    db.delete(job)
+    db.commit()
+    return {"detail": "Job deleted successfully"}

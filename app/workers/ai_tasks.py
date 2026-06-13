@@ -44,6 +44,13 @@ def generate_copy(self, job_id: int, product_id: int, video_id: int) -> dict:
         if not product or not video:
             raise ValueError("Product or video not found")
 
+        # Check if copy was already generated
+        if job.result_pin_id:
+            existing_pin = db.query(Pin).filter(Pin.id == job.result_pin_id).first()
+            if existing_pin:
+                logger.info("AI copy already generated. Using existing Pin ID %d", existing_pin.id)
+                return {"pin_id": existing_pin.id}
+
         # Generate copy via Gemini
         copy = generate_pin_copy(
             product_title=product.title,
@@ -55,9 +62,9 @@ def generate_copy(self, job_id: int, product_id: int, video_id: int) -> dict:
         )
 
         # Create draft pin record
-        board_id = settings.pinterest_board_id
+        board_id = settings.pinterest_board_name or settings.pinterest_board_id
         if not board_id:
-            raise ValueError("PINTEREST_BOARD_ID is not set in .env")
+            raise ValueError("Neither PINTEREST_BOARD_NAME nor PINTEREST_BOARD_ID is set in .env")
 
         pin = Pin(
             product_id=product_id,

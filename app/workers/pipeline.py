@@ -72,61 +72,10 @@ def run_pipeline(self, job_id: int):
 @celery_app.task(name="app.workers.pipeline.schedule_or_publish")
 def schedule_or_publish(job_id: int, pin_id: int):
     """
-    Decide whether to publish immediately or schedule for later.
-
-    Uses the scheduler to find the next available slot based on
-    daily pin limits and business hours.
+    Publish the pin immediately.
     """
-    db = SessionLocal()
-    try:
-        job = db.query(Job).filter(Job.id == job_id).first()
-        pin = db.query(Pin).filter(Pin.id == pin_id).first()
-
-        if not job or not pin:
-            raise ValueError("Job or pin not found")
-
-        job.status = JobStatus.SCHEDULING
-        job.current_step = "Calculating optimal publish time"
-        db.commit()
-
-        # Get existing scheduled times
-        existing = (
-            db.query(Pin.scheduled_at)
-            .filter(
-                Pin.status.in_([PinStatus.SCHEDULED, PinStatus.PUBLISHED]),
-                Pin.scheduled_at.isnot(None),
-            )
-            .all()
-        )
-        existing_times = [row[0] for row in existing if row[0]]
-
-        # Calculate next available slot
-        slots = calculate_next_slot(existing_times, count=1)
-        scheduled_time = slots[0]
-
-        now = datetime.now(timezone.utc)
-        time_until = (scheduled_time - now).total_seconds()
-
-        if time_until <= 120:
-            # Publish immediately (within 2 minutes)
-            logger.info("Publishing pin %d immediately", pin_id)
-            publish_pin(job_id, pin_id)
-        else:
-            # Schedule for later
-            pin.status = PinStatus.SCHEDULED
-            pin.scheduled_at = scheduled_time
-            job.status = JobStatus.COMPLETED
-            job.current_step = f"Pin scheduled for {scheduled_time.isoformat()}"
-            job.completed_at = datetime.now(timezone.utc)
-            db.commit()
-            logger.info("Scheduled pin %d for %s", pin_id, scheduled_time)
-
-    except Exception as exc:
-        db.rollback()
-        _mark_failed(db, job_id, str(exc))
-        raise
-    finally:
-        db.close()
+    logger.info("Publishing pin %d immediately", pin_id)
+    publish_pin(job_id, pin_id)
 
 
 @celery_app.task(name="app.workers.pipeline.retry_failed_jobs")

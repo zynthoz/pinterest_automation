@@ -30,7 +30,7 @@ TikTok Video Context:
 Requirements:
 1. **title**: Pinterest-optimized title (max 100 characters). Must be keyword-rich, engaging, and NOT clickbait. Include the product name/type.
 
-2. **description**: Pinterest-optimized description (300-500 characters).
+2. **description**: Pinterest-optimized description (100-200 characters).
    - Include a compelling call-to-action
    - Include relevant SEO keywords naturally
    - MUST end with these two lines (include them exactly):
@@ -157,10 +157,10 @@ def _validate_and_clean(data: dict, creator_username: str) -> dict:
         description = f"{description}\n{credit_line}"
 
     # Enforce description length (trim from middle if too long, keep end intact)
-    if len(description) > 500:
-        # Keep the last ~100 chars (disclosure + credit) intact
-        core = description[:400]
-        suffix = description[len(description) - 100 :]
+    if len(description) > 350:
+        # Keep the last ~120 chars (disclosure + credit) intact
+        core = description[:230]
+        suffix = description[len(description) - 120 :]
         description = core.rstrip() + "\n\n" + suffix.lstrip()
 
     return {

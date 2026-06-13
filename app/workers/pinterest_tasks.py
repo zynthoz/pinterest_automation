@@ -1,14 +1,15 @@
-"""Celery tasks for Pinterest pin publishing."""
+"""Celery tasks for Pinterest pin publishing via Playwright."""
 
 import logging
 from datetime import datetime, timezone
 
+from app.config import settings
 from app.database import SessionLocal
 from app.models.job import Job, JobStatus
 from app.models.pin import Pin, PinStatus
 from app.models.product import Product
 from app.models.tiktok_video import TikTokVideo
-from app.services.pinterest import PinterestClient, PinterestAPIError
+from app.services.pinterest_poster import PinterestPoster, PinterestPostError
 from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -17,8 +18,7 @@ logger = logging.getLogger(__name__)
 @celery_app.task(
     bind=True,
     name="app.workers.pinterest_tasks.publish_pin",
-    max_retries=2,
-    default_retry_delay=60,
+    max_retries=0,
 )
 def publish_pin(self, job_id: int, pin_id: int) -> dict:
     """
@@ -28,7 +28,7 @@ def publish_pin(self, job_id: int, pin_id: int) -> dict:
         dict with pinterest_pin_id
     """
     db = SessionLocal()
-    client = None
+    poster = None
     try:
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
@@ -56,22 +56,48 @@ def publish_pin(self, job_id: int, pin_id: int) -> dict:
             hashtag_str = " ".join(f"#{h.strip()}" for h in pin.hashtags.split(","))
             description = f"{description}\n\n{hashtag_str}"
 
-        # Publish to Pinterest
-        client = PinterestClient()
+        # Publish to Pinterest via Playwright browser automation
+        board_name = settings.pinterest_board_name or pin.board_id
+        
+        def on_progress(message: str):
+            try:
+                job.current_step = message
+                db.commit()
+            except Exception as e:
+                logger.warning("Failed to update progress: %s", e)
+
+        poster = PinterestPoster()
         pin.status = PinStatus.PUBLISHING
         db.commit()
 
-        result = client.create_video_pin(
-            video_path=video.local_path,
-            board_id=pin.board_id,
+        result = poster.create_pin(
+            media_path=video.local_path,
             title=pin.title,
             description=description,
             link=product.affiliate_url,
-            alt_text=pin.alt_text,
+            board_name=board_name,
+            on_progress=on_progress,
         )
 
-        # Update pin with Pinterest response
-        pin.pinterest_pin_id = result.get("id")
+        if not result.get("success"):
+            raise PinterestPostError(
+                result.get("message", "Unknown error"),
+                step="publish",
+            )
+
+        # Update pin with result
+        pin_url = result.get("pin_url")
+        if pin_url:
+            import re
+            match = re.search(r'/pin/(\d+)', pin_url)
+            if match:
+                pin.pinterest_pin_id = match.group(1)
+            elif pin_url.isdigit():
+                pin.pinterest_pin_id = pin_url
+            else:
+                pin.pinterest_pin_id = pin_url
+        else:
+            pin.pinterest_pin_id = None
         pin.status = PinStatus.PUBLISHED
         pin.posted_at = datetime.now(timezone.utc)
         pin.error = None
@@ -82,26 +108,27 @@ def publish_pin(self, job_id: int, pin_id: int) -> dict:
         job.completed_at = datetime.now(timezone.utc)
         db.commit()
 
-        logger.info("Published pin %d → Pinterest ID: %s", pin.id, pin.pinterest_pin_id)
+        logger.info("Published pin %d → %s", pin.id, pin.pinterest_pin_id)
+
+        # Clean up local video file to free disk space
+        _cleanup_video_file(video)
+        db.commit()
+
         return {"pinterest_pin_id": pin.pinterest_pin_id}
 
-    except PinterestAPIError as exc:
+    except PinterestPostError as exc:
         db.rollback()
-        if exc.status_code == 429:
-            # Rate limited — retry with longer delay
-            _update_pin_status(db, pin_id, PinStatus.SCHEDULED)
-            raise self.retry(exc=exc, countdown=120)
         _mark_failed(db, job_id, str(exc))
         _update_pin_status(db, pin_id, PinStatus.FAILED, str(exc))
-        raise self.retry(exc=exc) if self.request.retries < self.max_retries else exc
+        raise exc
     except Exception as exc:
         db.rollback()
         _mark_failed(db, job_id, str(exc))
         _update_pin_status(db, pin_id, PinStatus.FAILED, str(exc))
-        raise self.retry(exc=exc) if self.request.retries < self.max_retries else exc
+        raise exc
     finally:
-        if client:
-            client.close()
+        if poster:
+            poster.close()
         db.close()
 
 
@@ -165,3 +192,27 @@ def _update_pin_status(db, pin_id: int, status: str, error: str | None = None):
             db.commit()
     except Exception:
         db.rollback()
+
+
+def _cleanup_video_file(video) -> None:
+    """Delete the local video file from disk after a successful publish.
+
+    Clears ``video.local_path`` so the DB doesn't hold a stale reference.
+    Errors are logged but never raised — cleanup failures must never break
+    the publish success flow.
+    """
+    from pathlib import Path
+
+    if not video or not video.local_path:
+        return
+
+    path = Path(video.local_path)
+    try:
+        if path.exists():
+            path.unlink()
+            logger.info("Deleted local video file after publish: %s", path)
+        else:
+            logger.debug("Video file already gone (skipping delete): %s", path)
+        video.local_path = None
+    except Exception as exc:
+        logger.warning("Could not delete local video file %s: %s", path, exc)

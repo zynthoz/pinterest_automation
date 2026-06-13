@@ -93,7 +93,6 @@ async def dashboard(request: Request):
         failed_jobs = db.query(Job).filter(Job.status == JobStatus.FAILED).count()
 
         published_pins = db.query(Pin).filter(Pin.status == PinStatus.PUBLISHED).count()
-        scheduled_pins = db.query(Pin).filter(Pin.status == PinStatus.SCHEDULED).count()
 
         # Recent jobs
         recent_jobs = (
@@ -129,7 +128,6 @@ async def dashboard(request: Request):
                     "completed_jobs": completed_jobs,
                     "failed_jobs": failed_jobs,
                     "published_pins": published_pins,
-                    "scheduled_pins": scheduled_pins,
                 },
                 "jobs": jobs_data,
                 "pinterest_connected": bool(settings.pinterest_access_token),
@@ -168,6 +166,7 @@ async def pins_page(request: Request):
             "pins.html",
             context={
                 "pins": pins_data,
+                "pinterest_connected": bool(settings.pinterest_access_token),
             },
         )
     finally:

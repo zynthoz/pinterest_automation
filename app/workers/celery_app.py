@@ -41,14 +41,5 @@ celery_app.conf.update(
     ],
 
     # Beat schedule for periodic tasks (Phase 2)
-    beat_schedule={
-        "process-scheduled-pins": {
-            "task": "app.workers.pinterest_tasks.process_scheduled_pins",
-            "schedule": 60.0,  # Check every minute
-        },
-        "retry-failed-jobs": {
-            "task": "app.workers.pipeline.retry_failed_jobs",
-            "schedule": 300.0,  # Check every 5 minutes
-        },
-    },
+    beat_schedule={},
 )
